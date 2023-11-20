@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            /* Configuration for the STM32F303 Discovery board */
+            "type": "cortex-debug",
+            "request": "launch",
+            "name": "Debug (OpenOCD)",
+            "servertype": "openocd",
+            "cwd": "${workspaceRoot}",
+            "preLaunchTask": "Cargo Build (debug)",
+            "executable": "./target/thumbv7em-none-eabihf/debug/super-simple",
+            "device": "STM32F303VCT6",
+            "configFiles": [
+                "interface/stlink-v2-1.cfg",
+                "target/stm32f3x.cfg"
+            ],
+            "svdFile": "${workspaceRoot}/.vscode/STM32F303.svd"
+        }
+    ]
+}
