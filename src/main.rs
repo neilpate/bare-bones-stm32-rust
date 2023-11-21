@@ -21,7 +21,7 @@ const GPIOE_BSRR_ADDR: u32 = GPIOE_ADDR + GPIO_BSRR_OFFSET;
 #[entry]
 fn main() -> ! {
     unsafe {
-        let output_pin = 14; // On the STM32F3Discovery the West LED of the compass (green) is PORTE.15
+        let output_pin = 15; // On the STM32F3Discovery the West LED of the compass (green) is PORTE.15
 
         // Enable the GPIOE peripheral
         let rcc_ahbenr = &*(RCC_AHBENR as *mut volatile_register::RW<u32>);
