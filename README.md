@@ -11,3 +11,9 @@ It is assumed that VSCode will be used as the editor.
 - cortex-debug extension for VSCode
 - OpenOCD
 - GDB for ARM
+
+# Running it!
+Open the project in VSCode and hit F5.
+
+# How does this work?
+When run from VSCode, the binary is built and then the cortex-debug extension (which includes a runner which automatically starts OpenOCD and connects to it using GDB) will automatically load the code onto the target.
