@@ -3,9 +3,11 @@ The most basic, (almost) dependency free example possible to start STM32 tinkeri
 
 Most of the embedded rust tutorials start with the HAL type crates, and while these work fine they bring a lot of baggage with them. This makes it hard to understand exactly what is necessary to get started.
 
-The intention of this repo is to try and provide an as simple as possible example.
+The intention of this repo is to try and provide an as simple as possible example of some simple digital input, output and interrupt.
 
 It is assumed that VSCode will be used as the editor.
+
+Note: this is not very rust-like code. It is more like C. *Do not write real code like this, its just meant to be a starting point for understanding the hardware!*
 
 # Requirements
 - cortex-debug extension for VSCode
