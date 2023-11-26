@@ -125,7 +125,7 @@ fn setup_i2c_pin(pin: i32) -> () {
     }
 }
 
-fn i2c_read() -> u32 {
+fn i2c_read(address: u32) -> u32 {
     unsafe {
         let isr = &*((I2C1_ADDR + I2C_ISR_OFFSET) as *mut volatile_register::RW<u32>);
         let cr2 = &*((I2C1_ADDR + I2C_CR2_OFFSET) as *mut volatile_register::RW<u32>);
@@ -148,7 +148,7 @@ fn i2c_read() -> u32 {
         //     let _a = 0;
         // }
 
-        txdr.write(0x0F); // WHO_AM_I_A
+        txdr.write(address); // WHO_AM_I_A
 
         let txe = 0x01;
         // Loop until transmission has finished (TXE will be set high when tx is done)
@@ -180,6 +180,69 @@ fn i2c_read() -> u32 {
     }
 }
 
+fn i2c_write(address: u32, data: u32) -> () {
+    unsafe {
+        let isr = &*((I2C1_ADDR + I2C_ISR_OFFSET) as *mut volatile_register::RW<u32>);
+        let cr2 = &*((I2C1_ADDR + I2C_CR2_OFFSET) as *mut volatile_register::RW<u32>);
+        let txdr = &*((I2C1_ADDR + I2C_TXDR_OFFSET) as *mut volatile_register::RW<u32>);
+        let rxdr = &*((I2C1_ADDR + I2C_RXDR_OFFSET) as *mut volatile_register::RO<u32>);
+
+        let slave_address = 0b0011001;
+
+        let mut value = slave_address << 1;
+        value |= 1 << 16; // Number of bytes is 1
+        value |= 0 << 10; // Write
+
+        cr2.write(value); // Set slave address and number of bytes
+
+        cr2.modify(|r| r | (1 << 13)); // Bit 13 is the start bit
+
+        // // Loop until there is space in the transmit buffer
+        // let txis = 0x02;
+        // while isr.read() & txis == 1 {
+        //     let _a = 0;
+        // }
+
+        txdr.write(address);
+
+        let txe = 0x01;
+        // Loop until transmission has finished (TXE will be set high when tx is done)
+        while isr.read() & txe == 0 {
+            let a = 0;
+            let b = a;
+        }
+
+        txdr.write(data);
+
+        // Loop until transmission has finished (TXE will be set high when tx is done)
+        // while isr.read() & txe == 0 {
+        //     let a = 0;
+        //     let b = a;
+        // }
+
+        cr2.modify(|r| r | (1 << 13)); // Bit 13 is the start bit
+
+        // value = 0;
+
+        // value = 1 << 16; // Number of bytes
+        // value |= 1 << 10; // Request a read
+        // value |= 1 << 25; // Auto end
+
+        // cr2.modify(|r| r | value);
+
+        // cr2.modify(|r| r | (1 << 13)); // Bit 13 is the start bit
+
+        // let data_in = rxdr.read();
+        // let data2 = data_in + 1;
+        // let rxne = 1 << 2;
+        // Loop until there is data ready (RXNE will go high)
+        // while isr.read() & rxne == 0 {
+        //     let a = 0;
+        //     let b = a;
+        // }
+    }
+}
+
 #[entry]
 fn main() -> ! {
     setup_clocks();
@@ -187,8 +250,14 @@ fn main() -> ! {
     setup_i2c_pin(6); // SCL is Port B.6
     setup_i2c_pin(7); // SDA is Port B.7
 
+    i2c_write(0x20, 0x57); // 100 Hz mode, enable all axes
+
     loop {
-        let data_in = i2c_read();
-        let data2 = data_in + 1;
+        let data_low = i2c_read(0x2C);
+        let data_high = i2c_read(0x2D);
+        let value = data_low | data_high << 8;
+
+        let who_am_i = i2c_read(0x0f);
+        let v2 = value;
     }
 }
