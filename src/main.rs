@@ -6,6 +6,8 @@ use panic_halt as _;
 
 use volatile_register::{RO, RW, WO};
 
+use cortex_m_semihosting::{dbg, hio};
+
 // Reset & Clock Control
 const RCC_ADDR: u32 = 0x4002_1000;
 const RCC_APB1RSTR_OFFSET: u32 = 0x10; // Peripheral Reset Register
@@ -245,19 +247,22 @@ fn i2c_write(address: u32, data: u32) -> () {
 
 #[entry]
 fn main() -> ! {
+    dbg!("neil");
+
     setup_clocks();
     setup_i2c_peripheral();
     setup_i2c_pin(6); // SCL is Port B.6
     setup_i2c_pin(7); // SDA is Port B.7
 
-    i2c_write(0x20, 0x57); // 100 Hz mode, enable all axes
+    // i2c_write(0x20, 0x57); // 100 Hz mode, enable all axes
 
     loop {
-        let data_low = i2c_read(0x2C);
-        let data_high = i2c_read(0x2D);
-        let value = data_low | data_high << 8;
+        // let data_low = i2c_read(0x2C);
+        // let data_high = i2c_read(0x2D);
+        // let value = data_low | data_high << 8;
 
         let who_am_i = i2c_read(0x0f);
-        let v2 = value;
+        let v2 = who_am_i;
+        dbg!(who_am_i);
     }
 }
