@@ -6,7 +6,7 @@ use panic_halt as _;
 
 use volatile_register::{RO, RW, WO};
 
-use cortex_m_semihosting::{dbg, hio};
+use cortex_m::{iprintln, Peripherals};
 
 // Reset & Clock Control
 const RCC_ADDR: u32 = 0x4002_1000;
@@ -247,7 +247,9 @@ fn i2c_write(address: u32, data: u32) -> () {
 
 #[entry]
 fn main() -> ! {
-    dbg!("neil");
+    let mut p = Peripherals::take().unwrap();
+    let stim = &mut p.ITM.stim[0];
+    iprintln!(stim, "Hello, world!");
 
     setup_clocks();
     setup_i2c_peripheral();
@@ -262,7 +264,6 @@ fn main() -> ! {
         // let value = data_low | data_high << 8;
 
         let who_am_i = i2c_read(0x0f);
-        let v2 = who_am_i;
-        dbg!(who_am_i);
+        iprintln!(stim, "WHO_AM_I: {}", who_am_i);
     }
 }
