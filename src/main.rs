@@ -258,12 +258,22 @@ fn main() -> ! {
 
     // i2c_write(0x20, 0x57); // 100 Hz mode, enable all axes
 
+    let mut i: u128 = 0;
+
     loop {
-        // let data_low = i2c_read(0x2C);
-        // let data_high = i2c_read(0x2D);
-        // let value = data_low | data_high << 8;
+        i += 1;
+        iprintln!(stim, "Iteration {}", i);
 
         let who_am_i = i2c_read(0x0f);
         iprintln!(stim, "WHO_AM_I: {}", who_am_i);
+
+        // let data_low = i2c_read(0x2C);
+        // iprintln!(stim, "data_low: {}", data_low);
+
+        // let data_high = i2c_read(0x2D);
+        // iprintln!(stim, "data_high: {}", data_high);
+        // // let value = data_low | data_high << 8;
+
+        // for _ in 1..100 {}
     }
 }
