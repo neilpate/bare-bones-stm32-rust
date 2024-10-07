@@ -4,7 +4,7 @@
 use cortex_m_rt::entry;
 use panic_halt as _;
 
-use volatile_register::{RO, RW, WO};
+use volatile_register;
 
 use cortex_m::{iprintln, Peripherals};
 
@@ -12,17 +12,17 @@ use cortex_m::{iprintln, Peripherals};
 const RCC_ADDR: u32 = 0x4002_1000;
 const RCC_APB1RSTR_OFFSET: u32 = 0x10; // Peripheral Reset Register
 const RCC_AHB1ENR_OFFSET: u32 = 0x14; // Advanced High Performance Bus Enable Register
-const RCC_AHB2ENR_OFFSET: u32 = 0x18;
+                                      // const RCC_AHB2ENR_OFFSET: u32 = 0x18;
 const RCC_APB1ENR_OFFSET: u32 = 0x1C; // Peripheral clock enable Register
 
 // GPIO
 const MODER_OFFSET: u32 = 0x0; // Mode Register
 const OTYPER_OFFSET: u32 = 0x4; // Output Type Register
 const OSPEEDR_OFFSET: u32 = 0x8; // Output Speed Register
-const PUPDR_OFFSET: u32 = 0x0C; // Pull-up/Pull-down Register
-const IDR_OFFSET: u32 = 0x10; // Input Data Register
+                                 // const PUPDR_OFFSET: u32 = 0x0C; // Pull-up/Pull-down Register
+                                 // const IDR_OFFSET: u32 = 0x10; // Input Data Register
 const AFRL_OFFSET: u32 = 0x20; // Alternate Function Low Register
-const AFRH_OFFSET: u32 = 0x24; // Alternate Function High Register
+                               // const AFRH_OFFSET: u32 = 0x24; // Alternate Function High Register
 
 // General Purpose IO Port B
 const GPIOB_ADDR: u32 = 0x4800_0400;
@@ -115,7 +115,7 @@ fn setup_i2c_pin(pin: i32) -> () {
 
         // Set output speed
         let ospeedr = &*((GPIOB_ADDR + OSPEEDR_OFFSET) as *mut volatile_register::RW<u32>);
-        let value = (0b11 << (pin * 2));
+        let value = 0b11 << (pin * 2);
         ospeedr.modify(|r| r | value); // Set shigh speed
 
         // Set alternate function 4
@@ -127,16 +127,18 @@ fn setup_i2c_pin(pin: i32) -> () {
     }
 }
 
-fn i2c_read(address: u32) -> u32 {
+fn i2c_read(address: u8) -> u8 {
     unsafe {
         let isr = &*((I2C1_ADDR + I2C_ISR_OFFSET) as *mut volatile_register::RW<u32>);
         let cr2 = &*((I2C1_ADDR + I2C_CR2_OFFSET) as *mut volatile_register::RW<u32>);
-        let txdr = &*((I2C1_ADDR + I2C_TXDR_OFFSET) as *mut volatile_register::RW<u32>);
-        let rxdr = &*((I2C1_ADDR + I2C_RXDR_OFFSET) as *mut volatile_register::RO<u32>);
+        let txdr = &*((I2C1_ADDR + I2C_TXDR_OFFSET) as *mut volatile_register::RW<u8>);
+        let rxdr = &*((I2C1_ADDR + I2C_RXDR_OFFSET) as *mut volatile_register::RO<u8>);
 
-        let slave_address = 0b0011001;
+        let slave_address: u32 = 0b0011001;
 
-        let mut value = slave_address << 1;
+        let mut value: u32 = 0;
+
+        value |= slave_address << 1;
         value |= 1 << 16; // Number of bytes is 1
         value |= 0 << 10; // Write
 
@@ -154,14 +156,10 @@ fn i2c_read(address: u32) -> u32 {
 
         let txe = 0x01;
         // Loop until transmission has finished (TXE will be set high when tx is done)
-        while isr.read() & txe == 0 {
-            let a = 0;
-            let b = a;
-        }
+        while isr.read() & txe == 0 {}
 
         value = 0;
-
-        value = 1 << 16; // Number of bytes
+        value |= 1 << 16; // Number of bytes
         value |= 1 << 10; // Request a read
         value |= 1 << 25; // Auto end
 
@@ -170,7 +168,6 @@ fn i2c_read(address: u32) -> u32 {
         cr2.modify(|r| r | (1 << 13)); // Bit 13 is the start bit
 
         let data_in = rxdr.read();
-        let data2 = data_in + 1;
         let rxne = 1 << 2;
         // Loop until there is data ready (RXNE will go high)
         // while isr.read() & rxne == 0 {
