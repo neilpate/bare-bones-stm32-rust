@@ -1,3 +1,10 @@
+# ARCHIVED
+Please see: 
+https://github.com/neilpate/stm32-discoveryf3-barebones
+https://github.com/neilpate/stm32-discoveryf3-peripherals
+
+
+
 # bare-bones-stm32-rust
 The most basic, (almost) dependency free example possible to start STM32 tinkering in rust.
 
